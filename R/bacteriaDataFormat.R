@@ -29,7 +29,7 @@ bacteriaDataFormat <- function(bacteriaDetectionResult, spl=0.7, seed=12345, wit
         dplyr::select("Bacteria", "Source", setdiff(colnames(.), c("Bacteria", "Source", "ObjID")))
       return(bactData)
     }
-    if(any(c(spl==0, is.na(spl), is.null(spl)))){
+    if(suppressWarnings(any(c(spl==0, is.na(spl), is.null(spl))))){
       return(formatBacteriaData.Default(bacteriaDetectionResult))
     }else{
       trainIDs <- as.numeric(caret::createDataPartition(bactImageLabels, p=spl, list=F))

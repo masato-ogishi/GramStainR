@@ -21,4 +21,7 @@ Imports: tidyverse (>= 1.2.1),
     abind,
     psych,
     pbapply,
-    plotUtility
+    plotUtility,
+    readr,
+    classifierplots,
+    h2o
