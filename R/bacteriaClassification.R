@@ -88,7 +88,8 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
           dplyr::ungroup() %>%
           dplyr::group_by(Source) %>%
           dplyr::summarise(PredictedBacteria=lev[which.max(Probability)], Probability=Probability[1]) %>%
-          dplyr::mutate(PredictedBacteria=factor(PredictedBacteria, levels=lev))
+          dplyr::mutate(Bacteria=factor(Bacteria, levels=lev),
+                        PredictedBacteria=factor(PredictedBacteria, levels=lev))
         sink(paste0(outputHeader, "/ConfusionMatrix.txt"))
         print(caret::confusionMatrix(predDF$"PredictedBacteria", predDF$"Bacteria"))
         sink()
