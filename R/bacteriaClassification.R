@@ -1,5 +1,5 @@
 #' Classification of bacteria based on their morphological features.
-#' 
+#'
 #' @param trainDF A training dataframe.
 #' @param testDF A testing dataframe.
 #' @param validDF (Optional) A dataframe for external validation.
@@ -16,18 +16,26 @@
 #' @importFrom tidyr gather
 #' @importFrom readr write_csv
 #' @importFrom stringr str_detect
-#' @importFrom caret confusionMatrix 
+#' @importFrom caret downSample
+#' @importFrom caret confusionMatrix
 #' @importFrom classifierplots classifierplots_folder
 #' @import h2o
 #' @export
 #' @rdname bacteriaClassification
 #' @name bacteriaClassification
-bacteriaClassification <- function(trainDF, testDF, validDF=NULL, 
-                                   withReference=T, predictType=c("Bacteria","Image"), 
+bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
+                                   withReference=T, predictType=c("Bacteria","Image"),
                                    seed=12345, max_mem_size="30G"){
-  ## Train a bacteria image classifier
+  set.seed(seed)
+
+  ## Down-sampling to avoid class imbalance
+  trainDF <- dplyr::select(trainDF, -Source)  ## avoid leakage
+  trainDF <- caret::downSample(dplyr::select(trainDF, -Bacteria), trainDF$"Bacteria", yname="Bacteria") %>%
+    dplyr::select(Bacteria, setdiff(colnames(.), "Bacteria"))
+
+  ## Train bacteria classifiers
   h2oServer <- h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=6)
-  df_train <- h2o::as.h2o(dplyr::select(trainDF, -Source))
+  df_train <- h2o::as.h2o(trainDF)
   df_test <- h2o::as.h2o(testDF)
   aml <- h2o::h2o.automl(
     y="Bacteria",
@@ -41,7 +49,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   readr::write_csv(df_lb, "./Results/LeaderBoard.csv")
   View(df_lb)
   best_model <- h2o::h2o.getModel(df_lb[["model_id"]][[1]])
-  
+
   ## Evaluate the best classifier
   predEval <- function(evalH2ODF, H2OMod, withReference=T, predictType=c("Bacteria","Image"), outputHeader=""){
     dir.create(outputHeader, showWarnings=F, recursive=T)
@@ -89,7 +97,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
       }
     }
   }
-  
+
   predDFList <- list()
   if(is.null(validDF)){
     predDFList[["Train"]] <- predEval(df_train, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/Training/")
