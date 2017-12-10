@@ -29,7 +29,6 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   set.seed(seed)
 
   ## Down-sampling to avoid class imbalance
-  trainDF <- dplyr::select(trainDF, -Source)  ## avoid leakage
   trainDF <- caret::downSample(dplyr::select(trainDF, -Bacteria), trainDF$"Bacteria", yname="Bacteria") %>%
     dplyr::select(Bacteria, setdiff(colnames(.), "Bacteria"))
 
@@ -38,6 +37,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   df_train <- h2o::as.h2o(trainDF)
   df_test <- h2o::as.h2o(testDF)
   aml <- h2o::h2o.automl(
+    x=setdiff(colnames(trainDF), c("Bacteria", "Source")),  ## remove "Source" metadata to avoid leakage
     y="Bacteria",
     training_frame=df_train,
     validation_frame=df_test,
