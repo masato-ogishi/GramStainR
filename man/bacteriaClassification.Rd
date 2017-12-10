@@ -15,7 +15,7 @@ bacteriaClassification(trainDF, testDF, validDF = NULL, withReference = T,
 
 \item{validDF}{(Optional) A dataframe for external validation.}
 
-\item{withReference}{Whether the \code{bacteriaDetectionResult} contains bacteria labels for referencing purpose. If set TRUE, letters from original image file names are used as bacteria labels.}
+\item{withReference}{Whether the \code{bacteriaDetectionResult} contains bacteria labels for referencing purpose. If set TRUE, letters from original image file names are used as bacteria labels. Currently, only a binary classification is implemented.}
 
 \item{predictType}{At which level the predictive performance is evaluated. Can be either "Bacteria" or "Image".}
 

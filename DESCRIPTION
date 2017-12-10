@@ -10,18 +10,19 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Imports: tidyverse (>= 1.2.1),
+    readr,
     dplyr,
+    tidyr,
     stringr,
     tibble,
     data.table,
+    EBImage (>= 4.20.0), 
+    imager (>= 0.40.2), 
+    OpenImageR (>= 1.0.7),
+    classifierplots,
+    h2o (>= 3.16.0.2),
     caret (>= 6.0-77),
-    EBImage, 
-    imager, 
-    OpenImageR,
     abind,
     psych,
     pbapply,
-    plotUtility,
-    readr,
-    classifierplots,
-    h2o
+    plotUtility
