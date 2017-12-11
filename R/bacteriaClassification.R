@@ -27,7 +27,8 @@
 #' @name bacteriaClassification
 bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
                                    predictType=c("Bacteria","Image"),
-                                   seed=12345, max_mem_size="30G"){
+                                   seed=12345, 
+                                   max_mem_size="6G"){
   set.seed(seed)
   lev <- levels(trainDF$"Bacteria")
   if(is.null(lev)){
@@ -55,6 +56,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   df_lb <- as.data.frame(aml@leaderboard)
   View(df_lb)
   best_model <- h2o::h2o.getModel(df_lb[["model_id"]][[1]])
+  try(h2o::h2o.saveModel(object=best_model, path=getwd(), force=T), silent=T)
   
   ## Evaluate the best classifier
   predEval <- function(evalH2ODF, H2OMod, predictType=c("Bacteria","Image")){
