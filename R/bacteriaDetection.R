@@ -52,7 +52,7 @@ bacteriaDetection_Single <- function(originalImageFileName, windowSize=150){
     img.neg <- 1-fr
     thr <- EBImage::otsu(img.neg)*1.2
     img.thr <- img.neg > thr
-    img.thr <- img.thr %>% EBImage::dilate(EBImage::makeBrush(15, shape="disc")) %>% EBImage::fillHull()
+    img.thr <- img.thr %>% EBImage::dilate(EBImage::makeBrush(5, shape="disc")) %>% EBImage::fillHull()
     img.thr <- 1- img.thr*img.neg
     return(img.thr)
   })), colormode='Color')
