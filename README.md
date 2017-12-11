@@ -10,6 +10,7 @@ Installation
 
 ``` r
 if(!require(devtools)) install.packages("devtools")
+devtools::install_github("masato-ogishi/plotUtility")  ## internally used in GramStainR
 devtools::install_github("masato-ogishi/GramStainR")
 
 # Alternatively, please download this repository as a Zip file, unzip it to the directory you want, and run the following command.
