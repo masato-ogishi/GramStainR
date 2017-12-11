@@ -4,7 +4,7 @@
 \alias{bacteriaClassification}
 \title{Classification of bacteria based on their morphological features.}
 \usage{
-bacteriaClassification(trainDF, testDF, validDF = NULL, withReference = T,
+bacteriaClassification(trainDF, testDF, validDF = NULL,
   predictType = c("Bacteria", "Image"), seed = 12345,
   max_mem_size = "30G")
 }
@@ -15,14 +15,12 @@ bacteriaClassification(trainDF, testDF, validDF = NULL, withReference = T,
 
 \item{validDF}{(Optional) A dataframe for external validation.}
 
-\item{withReference}{Whether the \code{bacteriaDetectionResult} contains bacteria labels for referencing purpose. If set TRUE, letters from original image file names are used as bacteria labels. Currently, only a binary classification is implemented.}
-
-\item{predictType}{At which level the predictive performance is evaluated. Can be either "Bacteria" or "Image".}
+\item{predictType}{At which level prediction is summarized. Can be either "Bacteria" or "Image".}
 
 \item{seed}{A random seed.}
 
 \item{max_mem_size}{A memory limit for H2O Java machine learning engine.}
 }
 \description{
-Classification of bacteria based on their morphological features.
+Note: only binary classification (two types of bacteria) is currently supported.
 }

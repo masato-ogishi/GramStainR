@@ -13,7 +13,9 @@
 #' @importFrom stringr str_replace_all
 #' @importFrom EBImage readImage
 #' @importFrom EBImage Image
+#' @importFrom EBImage imageData
 #' @importFrom EBImage getFrames
+#' @importFrom EBImage combine
 #' @importFrom EBImage otsu
 #' @importFrom EBImage dilate
 #' @importFrom EBImage makeBrush
@@ -25,7 +27,6 @@
 #' @importFrom EBImage bwlabel
 #' @importFrom EBImage computeFeatures.moment
 #' @importFrom EBImage computeFeatures.shape
-#' @importFrom EBImage imageData
 #' @importFrom OpenImageR edge_detection
 #' @importFrom OpenImageR rgb_2gray
 #' @importFrom imager as.cimg
@@ -48,7 +49,7 @@ bacteriaDetection_Single <- function(originalImageFileName, windowSize=150){
   img.Image <- EBImage::readImage(originalImageFileName)[,,1:3]
   
   # Thresholding
-  img.thr <- EBImage::Image(combine(lapply(EBImage::getFrames(img.Image), function(fr){
+  img.thr <- EBImage::Image(EBImage::combine(lapply(EBImage::getFrames(img.Image), function(fr){
     img.neg <- 1-fr
     thr <- EBImage::otsu(img.neg)*1.2
     img.thr <- img.neg > thr
@@ -75,7 +76,7 @@ bacteriaDetection_Single <- function(originalImageFileName, windowSize=150){
     }
   }
   img.r <- dim(img.Image) %>% (function(X){X[2]/X[1]})
-  img.msk <- EBImage::Image(combine(lapply(EBImage::getFrames(img.Image), function(fr){fr*msk})), colormode='Color')
+  img.msk <- EBImage::Image(EBImage::combine(lapply(EBImage::getFrames(img.Image), function(fr){fr*msk})), colormode='Color')
   EBImage::display(img.msk, method="raster")
   suppressMessages(plotUtility::savePDF(outputFileName=paste0(header, "_Masked.pdf"), w=8, h=8*img.r))
   
@@ -132,7 +133,7 @@ bacteriaDetection_Single <- function(originalImageFileName, windowSize=150){
   if(nrow(featureDF)==1){
     EBImage::display(singleObjectImageCombined, all=T, method="raster")
   }else{
-    for(i in 2:nrow(featureDF)){singleObjectImageCombined <- combine(singleObjectImageCombined, singleObjectImageList[[i]])}
+    for(i in 2:nrow(featureDF)){singleObjectImageCombined <- EBImage::combine(singleObjectImageCombined, singleObjectImageList[[i]])}
     EBImage::display(singleObjectImageCombined, all=T, method="raster")
   }
   suppressMessages(plotUtility::savePDF(outputFileName=paste0(header, "_SingleObjectImageCombined.pdf"), w=8, h=8))
