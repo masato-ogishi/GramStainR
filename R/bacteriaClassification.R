@@ -102,13 +102,13 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
 
   predDFList <- list()
   if(is.null(validDF)){
-    predDFList[["Train"]] <- predEval(df_train, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/Training/")
-    predDFList[["Test"]] <- predEval(df_test, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/HoldOutValidation/")
+    predDFList[["Train"]] <- predEval(df_train, best_model, withReference=withReference, predictType=predictType, outputHeader=paste0("./Results/Prediction_", predictType, "/Training/"))
+    predDFList[["Test"]] <- predEval(df_test, best_model, withReference=withReference, predictType=predictType, outputHeader=paste0("./Results/Prediction_", predictType, "/HoldOutValidation/"))
   }else{
     df_valid <- h2o::as.h2o(validDF)
-    predDFList[["Train"]] <- predEval(df_train, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/Training/")
-    predDFList[["Test"]] <- predEval(df_test, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/HoldOutValidation/")
-    predDFList[["Valid"]] <- predEval(df_valid, best_model, withReference=withReference, predictType=predictType, outputHeader="./Results/ExternalValidation/")
+    predDFList[["Train"]] <- predEval(df_train, best_model, withReference=withReference, predictType=predictType, outputHeader=paste0("./Results/Prediction_", predictType, "/Training/"))
+    predDFList[["Test"]] <- predEval(df_test, best_model, withReference=withReference, predictType=predictType, outputHeader=paste0("./Results/Prediction_", predictType, "/HoldOutValidation/"))
+    predDFList[["Valid"]] <- predEval(df_valid, best_model, withReference=withReference, predictType=predictType, outputHeader=paste0("./Results/Prediction_", predictType, "/ExternalValidation/"))
   }
   gc();gc()
   return(predDFList)
