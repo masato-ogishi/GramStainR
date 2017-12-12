@@ -5,7 +5,6 @@
 #' @param trainDF A training dataframe.
 #' @param testDF A testing dataframe.
 #' @param validDF (Optional) A dataframe for external validation.
-#' @param predictType At which level prediction is summarized. Can be either "Bacteria" or "Image". 
 #' @param seed A random seed.
 #' @param max_mem_size A memory limit for H2O Java machine learning engine.
 #' @importFrom dplyr %>%
@@ -49,8 +48,10 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
     y="Bacteria",
     training_frame=df_train,
     validation_frame=df_test,
-    max_models=10,
-    stopping_metric="mean_per_class_error", stopping_tolerance=0.01, stopping_rounds=1,
+    max_models=50,
+    stopping_metric="AUTO", 
+    stopping_tolerance=0.05, 
+    stopping_rounds=5,
     seed=seed
   )
   df_lb <- as.data.frame(aml@leaderboard)
@@ -59,7 +60,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   try(h2o::h2o.saveModel(object=best_model, path=getwd(), force=T), silent=T)
   
   ## Evaluate the best classifier
-  predEval <- function(evalH2ODF, H2OMod, predictType=c("Bacteria","Image")){
+  predEval <- function(evalH2ODF, H2OMod){
     dir.create(outputHeader, showWarnings=F, recursive=T)
     evalDF <- as.data.frame(evalH2ODF)
     predDF <- as.data.frame(predict(H2OMod, evalH2ODF))
@@ -67,25 +68,22 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
     predDF <- data.frame("Bacteria"=evalDF$"Bacteria", "Source"=evalDF$"Source", predDF)
     thr <- pROC::coords(pROC::roc(evalDF$"Bacteria", predDF[[lev[1]]]), "best", ret="threshold")
     predDF$"PredictedBacteria" <- dplyr::if_else(predDF[[lev[1]]]>=thr, lev[1], lev[2])
-    if(predictType=="Bacteria"){
-      return(predDF)
-    }else if(predictType=="Image"){
-      predDF <- predDF %>% 
+    predDF_Bacteria <- predDF
+    predDF_Image <- predDF %>% 
         tidyr::gather(ProbBacteria, Probability, -Bacteria, -Source, -PredictedBacteria) %>%
         dplyr::group_by(Bacteria, Source, ProbBacteria) %>%
-        dplyr::summarize(Probability=mean(Probability)) %>%
+        dplyr::summarize(Probability=mean(Probability)) %>%  ## dplyr::summarize(Probability=quantile(Probability, 0.9, names=F)) %>%
         dplyr::ungroup() %>%
         tidyr::spread(ProbBacteria, Probability)
-      return(predDF)
-    }
+    return(list("Bacteria"=predDF_Bacteria, "Image"=predDF_Image))
   }
   predDFList <- list()
   predDFList[["LeaderBoard"]] <- df_lb
-  predDFList[["Train"]] <- predEval(df_train, best_model, predictType=predictType)
-  predDFList[["Test"]] <- predEval(df_test, best_model, predictType=predictType)
+  predDFList[["Train"]] <- predEval(df_train, best_model)
+  predDFList[["Test"]] <- predEval(df_test, best_model)
   if(!is.null(validDF)){
     df_valid <- h2o::as.h2o(validDF)
-    predDFList[["Valid"]] <- predEval(df_valid, best_model, predictType=predictType)
+    predDFList[["Valid"]] <- predEval(df_valid, best_model)
   }
   gc();gc()
   return(predDFList)
