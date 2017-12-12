@@ -61,7 +61,6 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   
   ## Evaluate the best classifier
   predEval <- function(evalH2ODF, H2OMod){
-    dir.create(outputHeader, showWarnings=F, recursive=T)
     evalDF <- as.data.frame(evalH2ODF)
     predDF <- as.data.frame(predict(H2OMod, evalH2ODF))
     colnames(predDF)[1] <- "PredictedBacteria"
