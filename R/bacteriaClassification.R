@@ -7,6 +7,7 @@
 #' @param validDF (Optional) A dataframe for external validation.
 #' @param seed A random seed.
 #' @param max_mem_size A memory limit for H2O Java machine learning engine.
+#' @param outputDir A directory for saving outputs.
 #' @importFrom dplyr %>%
 #' @importFrom dplyr select
 #' @importFrom dplyr mutate
@@ -27,8 +28,12 @@
 bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
                                    predictType=c("Bacteria","Image"),
                                    seed=12345, 
-                                   max_mem_size="6G"){
+                                   max_mem_size="6G",
+                                   outputDir="./Results/"){
   set.seed(seed)
+  dir.create(outputDir, showWarnings=F, recursive=T)
+  
+  ## Define bacteria species to be classified
   lev <- levels(trainDF$"Bacteria")
   if(is.null(lev)){
     trainDF$"Bacteria" <- as.factor(trainDF$"Bacteria")
