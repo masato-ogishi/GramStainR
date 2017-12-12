@@ -62,7 +62,7 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
   df_lb <- as.data.frame(aml@leaderboard)
   View(df_lb)
   best_model <- h2o::h2o.getModel(df_lb[["model_id"]][[1]])
-  try(h2o::h2o.saveModel(object=best_model, path=getwd(), force=T), silent=T)
+  try(h2o::h2o.saveModel(object=best_model, path=outputDir, force=T), silent=T)
   
   ## Evaluate the best classifier
   predEval <- function(evalH2ODF, H2OMod){
