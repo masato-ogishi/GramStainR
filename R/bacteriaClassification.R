@@ -1,6 +1,4 @@
 #' Classification of bacteria based on their morphological features.
-#' 
-#' Note: only binary classification (two types of bacteria) is currently supported.
 #'
 #' @param trainDF A training dataframe.
 #' @param testDF A testing dataframe.
@@ -25,7 +23,8 @@
 #' @export
 #' @rdname bacteriaClassification
 #' @name bacteriaClassification
-bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
+bacteriaClassification <- function(trainDF, testDF, 
+                                   validDF=NULL,
                                    predictType=c("Bacteria","Image"),
                                    seed=12345, 
                                    max_mem_size="6G",
@@ -70,8 +69,10 @@ bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
     predDF <- as.data.frame(predict(H2OMod, evalH2ODF))
     colnames(predDF)[1] <- "PredictedBacteria"
     predDF <- data.frame("Bacteria"=evalDF$"Bacteria", "Source"=evalDF$"Source", predDF)
-    thr <- pROC::coords(pROC::roc(evalDF$"Bacteria", predDF[[lev[1]]]), "best", ret="threshold")
-    predDF$"PredictedBacteria" <- dplyr::if_else(predDF[[lev[1]]]>=thr, lev[1], lev[2])
+    if(length(lev)==2){
+      thr <- pROC::coords(pROC::roc(evalDF$"Bacteria", predDF[[lev[1]]]), "best", ret="threshold")
+      predDF$"PredictedBacteria" <- dplyr::if_else(predDF[[lev[1]]]>=thr, lev[1], lev[2])
+    }
     predDF_Bacteria <- predDF
     predDF_Image <- predDF %>% 
         tidyr::gather(ProbBacteria, Probability, -Bacteria, -Source, -PredictedBacteria) %>%
