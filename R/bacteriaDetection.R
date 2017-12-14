@@ -156,7 +156,10 @@ bacteriaDetection_Single <- function(originalImageFileName, windowSize=150){
   imageSource <- sub(pattern="(.*)\\..*$", replacement="\\1", basename(originalImageFileName))
   featureDF <- tibble::as_tibble(data.frame("Source"=imageSource, featureDF))
   pixelDF <- tibble::as_tibble(data.frame("Source"=imageSource, pixelDF))
-  return(list("FeatureDF"=featureDF, "PixelDF"=pixelDF, "SingleObjectImageSet"=singleObjectImageList))
+  res <- list("FeatureDF"=featureDF, "PixelDF"=pixelDF, "SingleObjectImageSet"=singleObjectImageList)
+  rm(list=setdiff(ls(), "res")
+  gc();gc()
+  return(res)
 }
 
 #' @export
