@@ -46,6 +46,7 @@ bacteriaDetection_Single <- function(originalImageFileName){
   ws=round(windowSize/2)
   brushSize=5
   thresholdAdjustRatio=1.2
+  minEccentricity=0.6
   minAreaSize=300
   maxAreaSize=1000
   minOutlierFeature=0.1
@@ -110,7 +111,8 @@ bacteriaDetection_Single <- function(originalImageFileName){
     dplyr::mutate(m.theta=m.theta*180/pi)   ## convert radian to degree
   featureDF[["OutlierFeature"]] <- (featureDF$s.perimeter/featureDF$s.area)*(featureDF$s.radius.max/featureDF$s.radius.min)
   featureDF <- featureDF %>%
-    dplyr::filter(m.majoraxis<=windowSize) %>%                      
+    dplyr::filter(m.majoraxis<=windowSize) %>%  
+    dplyr::filter(minEccentricity<=m.eccentricity) %>% 
     dplyr::filter(minAreaSize<=s.area & s.area<=maxAreaSize) %>%   
     dplyr::filter(minOutlierFeature<=OutlierFeature & OutlierFeature<=maxOutlierFeature) %>%
     dplyr::filter(1<=round(m.cx-ws) & round(m.cx+ws)<=dim(img.bw)[1] & 1<=round(m.cy-ws) & round(m.cy+ws)<=dim(img.bw)[2]) %>%
