@@ -6,14 +6,12 @@
 \alias{bacteriaDetection}
 \title{Automatic bacteria detection.}
 \usage{
-bacteriaDetection_Single(originalImageFileName, windowSize = 150)
+bacteriaDetection_Single(originalImageFileName)
 
-bacteriaDetection(originalImageFileNameList, windowSize = 150)
+bacteriaDetection(originalImageFileNameList)
 }
 \arguments{
 \item{originalImageFileName}{The input image file name. Should be provided as a combination of letters and numbers, since letters are interpreted as image source labels and numbers as image IDs.}
-
-\item{windowSize}{An integer representing the window pixel size for capturing a single bacteria. User must specify this by manually examining image data provided.}
 
 \item{originalImageFileNameList}{A list of image file names.}
 }

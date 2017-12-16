@@ -5,8 +5,8 @@
 \title{Classification of bacteria based on their morphological features.}
 \usage{
 bacteriaClassification(trainDF, testDF, validDF = NULL,
-  predictType = c("Bacteria", "Image"), seed = 12345,
-  max_mem_size = "30G")
+  predictType = c("Bacteria", "Image"), seed = 12345, max_mem_size = "6G",
+  outputDir = "./Results/")
 }
 \arguments{
 \item{trainDF}{A training dataframe.}
@@ -15,12 +15,12 @@ bacteriaClassification(trainDF, testDF, validDF = NULL,
 
 \item{validDF}{(Optional) A dataframe for external validation.}
 
-\item{predictType}{At which level prediction is summarized. Can be either "Bacteria" or "Image".}
-
 \item{seed}{A random seed.}
 
 \item{max_mem_size}{A memory limit for H2O Java machine learning engine.}
+
+\item{outputDir}{A directory for saving outputs.}
 }
 \description{
-Note: only binary classification (two types of bacteria) is currently supported.
+Classification of bacteria based on their morphological features.
 }

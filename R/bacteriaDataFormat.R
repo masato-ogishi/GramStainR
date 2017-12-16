@@ -1,5 +1,5 @@
 #' Bacteria data formatting for machine learning
-#' 
+#'
 #' @param bacteriaDetectionResult The result by \code{bacteriaDetection}.
 #' @param spl A ratio of training data. Remaining data will be designated as testing data. Disable splitting by providing 0, NA, or NULL.
 #' @param seed A random seed.
@@ -17,7 +17,7 @@ bacteriaDataFormat <- function(bacteriaDetectionResult, spl=0.7, seed=12345, wit
   if(withReference==F){  ## Splitting must be done with the bacteria labels of provided dataset
     formatBacteriaData.Default <- function(res){
       bactData <- data.table::rbindlist(lapply(res, function(d){d$"PixelDF"})) %>%
-        dplyr::select("Source", setdiff(colnames(.), c("Source", "ObjID")))
+        dplyr::select("Source", "ObjID", setdiff(colnames(.), c("Source", "ObjID")))
       return(bactData)
     }
     return(formatBacteriaData.Default(bacteriaDetectionResult))
@@ -26,7 +26,7 @@ bacteriaDataFormat <- function(bacteriaDetectionResult, spl=0.7, seed=12345, wit
     formatBacteriaData.Default <- function(res){
       bactData <- data.table::rbindlist(lapply(res, function(d){d$"PixelDF"})) %>%
         dplyr::mutate("Bacteria"=factor(gsub("[[:digit:]]+$", "", Source), levels=levels(bactImageLabels))) %>%
-        dplyr::select("Bacteria", "Source", setdiff(colnames(.), c("Bacteria", "Source", "ObjID")))
+        dplyr::select("Bacteria", "Source", "ObjID", setdiff(colnames(.), c("Bacteria", "Source", "ObjID")))
       return(bactData)
     }
     if(suppressWarnings(any(c(spl==0, is.na(spl), is.null(spl))))){
