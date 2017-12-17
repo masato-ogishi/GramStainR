@@ -134,13 +134,8 @@ bacteriaDetection_Single <- function(originalImageFileName){
   }
   
   # Generate a combined view
-  singleObjectImageCombined <- singleObjectImageList[[1]]
-  if(nrow(featureDF)==1){
-    EBImage::display(singleObjectImageCombined, all=T, method="raster")
-  }else{
-    for(i in 2:nrow(featureDF)){singleObjectImageCombined <- EBImage::combine(singleObjectImageCombined, singleObjectImageList[[i]])}
-    EBImage::display(singleObjectImageCombined, all=T, method="raster")
-  }
+  singleObjectImageCombined <- EBImage::combine(singleObjectImageList)
+  EBImage::display(singleObjectImageCombined, all=T, method="raster")
   suppressMessages(plotUtility::savePDF(outputFileName=paste0(header, "_SingleObjectImageCombined.pdf"), w=8, h=8))
   
   # Convert to pixel matrices
