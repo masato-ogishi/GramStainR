@@ -5,8 +5,8 @@
 \title{Classification of bacteria based on their morphological features.}
 \usage{
 bacteriaClassification(trainDF, testDF, validDF = NULL,
-  predictType = c("Bacteria", "Image"), seed = 12345, max_mem_size = "6G",
-  outputDir = "./Results/")
+  predictType = c("Bacteria", "Image"), seed = 12345,
+  outputDir = "./Results/", max_mem_size = "6G")
 }
 \arguments{
 \item{trainDF}{A training dataframe.}
@@ -17,9 +17,9 @@ bacteriaClassification(trainDF, testDF, validDF = NULL,
 
 \item{seed}{A random seed.}
 
-\item{max_mem_size}{A memory limit for H2O Java machine learning engine.}
-
 \item{outputDir}{A directory for saving outputs.}
+
+\item{max_mem_size}{A memory limit for H2O Java machine learning engine.}
 }
 \description{
 Classification of bacteria based on their morphological features.
