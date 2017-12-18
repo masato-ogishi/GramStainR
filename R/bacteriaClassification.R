@@ -4,8 +4,8 @@
 #' @param testDF A testing dataframe.
 #' @param validDF (Optional) A dataframe for external validation.
 #' @param seed A random seed.
-#' @param max_mem_size A memory limit for H2O Java machine learning engine.
 #' @param outputDir A directory for saving outputs.
+#' @param max_mem_size A memory limit for H2O Java machine learning engine.
 #' @importFrom dplyr %>%
 #' @importFrom dplyr select
 #' @importFrom dplyr mutate
@@ -28,8 +28,8 @@ bacteriaClassification <- function(trainDF, testDF,
                                    validDF=NULL,
                                    predictType=c("Bacteria","Image"),
                                    seed=12345,
-                                   max_mem_size="6G",
-                                   outputDir="./Results/"){
+                                   outputDir="./Results/",
+                                   max_mem_size="6G"){
   set.seed(seed)
   dir.create(outputDir, showWarnings=F, recursive=T)
 
@@ -70,10 +70,6 @@ bacteriaClassification <- function(trainDF, testDF,
     predDF <- as.data.frame(predict(H2OMod, evalH2ODF))
     colnames(predDF)[1] <- "PredictedBacteria"
     predDF <- dplyr::bind_cols(dplyr::select(evalDF, c("Bacteria", "Source", "ObjID")), predDF)
-    if(length(lev)==2){
-      thr <- pROC::coords(pROC::roc(evalDF$"Bacteria", predDF[[lev[1]]]), "best", ret="threshold")
-      predDF$"PredictedBacteria" <- dplyr::if_else(predDF[[lev[1]]]>=thr, lev[1], lev[2])
-    }
     predDF_Bacteria <- predDF
     predDF_Image <- predDF %>%
         tidyr::gather(ProbBacteria, Probability, -Bacteria, -Source, -ObjID, -PredictedBacteria) %>%
