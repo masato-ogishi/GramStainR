@@ -87,6 +87,8 @@ bacteriaClassification <- function(trainDF, testDF,
     df_valid <- h2o::as.h2o(validDF)
     predDFList[["Valid"]] <- predEval(df_valid, best_model)
   }
+  invisible(h2o::h2o.shutdown(F))
+  Sys.sleep(5)
   gc();gc()
   return(predDFList)
 }
