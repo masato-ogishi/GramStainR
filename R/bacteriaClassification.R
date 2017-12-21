@@ -24,9 +24,7 @@
 #' @export
 #' @rdname bacteriaClassification
 #' @name bacteriaClassification
-bacteriaClassification <- function(trainDF, testDF,
-                                   validDF=NULL,
-                                   predictType=c("Bacteria","Image"),
+bacteriaClassification <- function(trainDF, testDF, validDF=NULL,
                                    seed=12345,
                                    outputDir="./Results/",
                                    max_mem_size="6G"){
@@ -87,6 +85,7 @@ bacteriaClassification <- function(trainDF, testDF,
     df_valid <- h2o::as.h2o(validDF)
     predDFList[["Valid"]] <- predEval(df_valid, best_model)
   }
-  invisible(h2o::h2o.shutdown(F))
+  rm(list=setdiff(ls(), "predDFList"))
+  gc();gc()
   return(predDFList)
 }
