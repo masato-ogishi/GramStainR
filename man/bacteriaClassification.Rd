@@ -4,8 +4,7 @@
 \alias{bacteriaClassification}
 \title{Classification of bacteria based on their morphological features.}
 \usage{
-bacteriaClassification(trainDF, testDF, validDF = NULL,
-  predictType = c("Bacteria", "Image"), seed = 12345,
+bacteriaClassification(trainDF, testDF, validDF = NULL, seed = 12345,
   outputDir = "./Results/", max_mem_size = "6G")
 }
 \arguments{
