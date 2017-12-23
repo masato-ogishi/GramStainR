@@ -2,24 +2,49 @@
 % Please edit documentation in R/bacteriaClassification.R
 \name{bacteriaClassification}
 \alias{bacteriaClassification}
-\title{Classification of bacteria based on their morphological features.}
+\alias{bacteriaClassification_AutoML}
+\alias{bacteriaClassification}
+\alias{bacteriaClassification_Prediction}
+\alias{bacteriaClassification}
+\alias{bacteriaClassification_Evaluation}
+\title{Classification of bacteria based on their morphological features using H2O AutoML instances}
 \usage{
-bacteriaClassification(trainDF, testDF, validDF = NULL, seed = 12345,
-  outputDir = "./Results/", max_mem_size = "6G")
+bacteriaClassification_AutoML(trainDF, testDF, destDir = "./Results/",
+  LeaderBoardName = "LeaderBoard.csv", H2OModelName = "BestH2OModel",
+  seed = 12345, max_mem_size = "6G", nthreads = 6)
+
+bacteriaClassification_Prediction(evalDF, destDir = "./Results/",
+  H2OModelName = "BestH2OModel", seed = 12345, max_mem_size = "6G",
+  nthreads = 6)
+
+bacteriaClassification_Evaluation(evalDF, targetBacteria = "Paeruginosa",
+  destDir = "./Results/", H2OModelName = "BestH2OModel",
+  PredictionHeader = "Predictions_", seed = 12345, max_mem_size = "6G",
+  nthreads = 6)
 }
 \arguments{
-\item{trainDF}{A training dataframe.}
+\item{trainDF}{A dataframe for model training.}
 
-\item{testDF}{A testing dataframe.}
+\item{testDF}{A dataframe for hold-out validation.}
 
-\item{validDF}{(Optional) A dataframe for external validation.}
+\item{destDir}{A directory for saving outputs.}
+
+\item{LeaderBoardName}{The file name of the leader board to be saved. The file format must be CSV. If you want to skip saving, set \code{NULL}.}
+
+\item{H2OModelName}{The file name of the best H2O model to be saved. No file extension is required. If you want to skip saving, set \code{NULL}.}
 
 \item{seed}{A random seed.}
 
-\item{outputDir}{A directory for saving outputs.}
+\item{max_mem_size}{The upper limit of memory for H2O Java machine learning engine.}
 
-\item{max_mem_size}{A memory limit for H2O Java machine learning engine.}
+\item{nthreads}{The number of threads for H2O Java machine learning engine.}
+
+\item{evalDF}{A dataframe for evaluation.}
+
+\item{targetBacteria}{The name of the bacteria of interest.}
+
+\item{PredictionHeader}{The file name header of the prediction results to be saved.}
 }
 \description{
-Classification of bacteria based on their morphological features.
+Classification of bacteria based on their morphological features using H2O AutoML instances
 }

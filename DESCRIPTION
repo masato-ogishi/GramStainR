@@ -1,6 +1,6 @@
 Package: GramStainR
 Title: Automatic classification of digital Gram stain images
-Version: 0.1.2
+Version: 0.1.3
 Author: Masato Ogishi
 Maintainer: Masato Ogishi <oogishi-tky@umin.ac.jp>
 Description: Automatic classification of digital Gram stain images.
@@ -14,6 +14,7 @@ Imports: tidyverse (>= 1.2.1),
     dplyr,
     tidyr,
     stringr,
+    ggplot2,
     tibble,
     data.table,
     EBImage (>= 4.20.0), 
@@ -25,5 +26,6 @@ Imports: tidyverse (>= 1.2.1),
     psych,
     pbapply,
     pROC,
+    plotROC,
     classifierplots,
     plotUtility
