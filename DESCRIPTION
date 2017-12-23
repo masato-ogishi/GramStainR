@@ -28,4 +28,5 @@ Imports: tidyverse (>= 1.2.1),
     pROC,
     plotROC,
     classifierplots,
-    plotUtility
+    plotUtility,
+    ggsci

@@ -24,13 +24,14 @@
 #' @importFrom stringr str_detect
 #' @importFrom readr write_csv
 #' @importFrom caret downSample
-#' @importFrom pROC roc
+#' @importFrom pROC multiclass.roc
 #' @importFrom pROC coords
 #' @importFrom plotROC geom_roc
 #' @importFrom plotROC style_roc
 #' @importFrom plotROC calc_auc
 #' @importFrom plotUtility theme_Publication
 #' @importFrom plotUtility savePDF
+#' @importFrom ggsci pal_d3
 #' @import h2o
 #' @import ggplot2
 #' @export
@@ -134,13 +135,18 @@ bacteriaClassification_Evaluation <- function(
   print(cm)
   sink()
 
-  probPlot <- ggplot(predDFList$"Image", aes_string(x="Bacteria", y=targetBacteria)) +
-    geom_jitter(width=0.2) +
-    xlab(NULL) + plotUtility::theme_Publication()
   lev <- levels(evalDF$"Bacteria")
-  if(length(lev)==2){
-    thr <- pROC::coords(pROC::roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]]), "best", ret="threshold")[1] ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
-    probPlot <- probPlot + geom_hline(yintercept=thr, color="red", size=1)
+  colPal <- ggsci::pal_d3()(length(lev))
+  colPal[grep(targetBacteria, lev, value=F)] <- "black"
+  thrList <- suppressWarnings(lapply(pROC::multiclass.roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]])$rocs, function(r){pROC::coords(r, "best", ret="threshold")[1]})) ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
+  probPlot <- ggplot(predDFList$"Image", aes_string(x="Bacteria", y=targetBacteria, color="Bacteria")) +
+    geom_jitter(width=0.2) +
+    xlab(NULL) +
+    scale_color_manual(values=colPal) +
+    plotUtility::theme_Publication()
+  colPal <- setdiff(colPal, "black")
+  for(i in 1:length(thrList)){
+    probPlot <- probPlot + geom_hline(yintercept=thrList[[i]], color=colPal[i], size=1)
   }
   plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")))
 
