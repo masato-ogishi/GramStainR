@@ -138,16 +138,15 @@ bacteriaClassification_Evaluation <- function(
   lev <- levels(evalDF$"Bacteria")
   colPal <- ggsci::pal_d3()(length(lev))
   colPal[grep(targetBacteria, lev, value=F)] <- "black"
-  thrList <- suppressWarnings(lapply(pROC::multiclass.roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]])$rocs, function(r){pROC::coords(r, "best", ret="threshold")[1]})) ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
-  probPlot <- ggplot(predDFList$"Image", aes_string(x="Bacteria", y=targetBacteria, color="Bacteria")) +
-    geom_jitter(width=0.2) +
-    xlab(NULL) +
-    scale_color_manual(values=colPal) +
-    plotUtility::theme_Publication()
-  colPal <- setdiff(colPal, "black")
+  thrList <- suppressWarnings(lapply(pROC::multiclass.roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]])$rocs, function(r){pROC::coords(r, "best", ret="threshold")})) ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
+  probPlot <- ggplot(data=predDFList$"Image")
   for(i in 1:length(thrList)){
-    probPlot <- probPlot + geom_hline(yintercept=thrList[[i]], color=colPal[i], size=1)
+    probPlot <- probPlot + geom_hline(yintercept=thrList[[i]][1], color=setdiff(colPal, "black")[i], size=1)
   }
+  probPlot <- probPlot +
+    geom_jitter(aes_string(x="Bacteria", y=targetBacteria, color="Bacteria"), width=0.2) +
+    xlab(NULL) + scale_color_manual(values=colPal, guide=F) +
+    plotUtility::theme_Publication()
   plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")))
 
   if(length(lev)==2){
