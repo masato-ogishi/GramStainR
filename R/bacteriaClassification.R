@@ -127,13 +127,7 @@ bacteriaClassification_Evaluation <- function(
   h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
   predDFList <- bacteriaClassification_Prediction(evalDF, destDir, H2OModelName, seed, max_mem_size, nthreads)
-  saveRDS(predDFList, file.path(destDir, paste0(PredictionHeader, "Results.rds")))
-
-  cm <- caret::confusionMatrix(predDFList$"Bacteria"$"PredictedBacteria", predDFList$"Bacteria"$"Bacteria")
-  print(cm)
-  sink(file.path(destDir, paste0(PredictionHeader, "BacteriaLevel_ConfusionMatrix_Seed", seed, ".txt")))
-  print(cm)
-  sink()
+  saveRDS(predDFList, file.path(destDir, paste0(PredictionHeader, "Results_Seed", seed, ".rds")))
 
   lev <- levels(evalDF$"Bacteria")
   colPal <- ggsci::pal_d3()(length(lev))
