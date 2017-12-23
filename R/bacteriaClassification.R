@@ -130,7 +130,7 @@ bacteriaClassification_Evaluation <- function(
 
   cm <- caret::confusionMatrix(predDFList$"Bacteria"$"PredictedBacteria", predDFList$"Bacteria"$"Bacteria")
   print(cm)
-  sink(file.path(destDir, paste0(PredictionHeader, "BacteriaLevel_ConfusionMatrix.txt")))
+  sink(file.path(destDir, paste0(PredictionHeader, "BacteriaLevel_ConfusionMatrix_Seed", seed, ".txt")))
   print(cm)
   sink()
 
@@ -142,7 +142,7 @@ bacteriaClassification_Evaluation <- function(
     thr <- pROC::coords(pROC::roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]]), "best", ret="threshold")[1] ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
     probPlot <- probPlot + geom_hline(yintercept=thr, color="red", size=1)
   }
-  plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot.pdf")))
+  plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")))
 
   if(length(lev)==2){
     rocPlot <- predDFList$"Image" %>%
@@ -152,7 +152,7 @@ bacteriaClassification_Evaluation <- function(
       plotROC::style_roc() +
       plotUtility::theme_Publication()
     rocPlot <- rocPlot + annotate("text", x=.75, y=.25, size=8, label=paste("AUC =", round(plotROC::calc_auc(rocPlot)$"AUC", 2)))
-    plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot.pdf")))
+    plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot_Seed", seed, ".pdf")))
   }
 
   return(predDFList)
