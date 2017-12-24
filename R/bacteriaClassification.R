@@ -24,14 +24,14 @@
 #' @importFrom stringr str_detect
 #' @importFrom readr write_csv
 #' @importFrom caret downSample
-#' @importFrom pROC multiclass.roc
+#' @importFrom pROC roc
 #' @importFrom pROC coords
 #' @importFrom plotROC geom_roc
 #' @importFrom plotROC style_roc
 #' @importFrom plotROC calc_auc
 #' @importFrom plotUtility theme_Publication
 #' @importFrom plotUtility savePDF
-#' @importFrom ggsci pal_d3
+#' @importFrom RColorBrewer brewer.pal
 #' @import h2o
 #' @import ggplot2
 #' @export
@@ -96,22 +96,27 @@ bacteriaClassification_AutoML <- function(
 bacteriaClassification_Prediction <- function(
   evalDF, destDir="./Results/", H2OModelName="BestH2OModel", seed=12345, max_mem_size="6G", nthreads=6
 ){
+  # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
   h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
+  # Bacteria-level prediction
   evalH2ODF <- h2o::as.h2o(evalDF)
   H2OMod <- h2o::h2o.loadModel(file.path(destDir, H2OModelName))
   predDF <- as.data.frame(predict(H2OMod, evalH2ODF))
   colnames(predDF)[1] <- "PredictedBacteria"
   predDF <- dplyr::bind_cols(dplyr::select(evalDF, c("Bacteria", "Source", "ObjID")), predDF)
   predDF_Bacteria <- predDF
+
+  # Image-level prediction
   predDF_Image <- predDF %>%
     tidyr::gather(ProbBacteria, Probability, -Bacteria, -Source, -ObjID, -PredictedBacteria) %>%
     dplyr::group_by(Bacteria, Source, ProbBacteria) %>%
     dplyr::summarize(Probability=mean(Probability)) %>%  ## dplyr::summarize(Probability=quantile(Probability, 0.9, names=F)) %>%
     dplyr::ungroup() %>%
     tidyr::spread(ProbBacteria, Probability)
+
   return(list("Bacteria"=predDF_Bacteria, "Image"=predDF_Image))
 }
 
@@ -122,37 +127,37 @@ bacteriaClassification_Evaluation <- function(
   evalDF, targetBacteria="Paeruginosa", destDir="./Results/", H2OModelName="BestH2OModel", PredictionHeader="Predictions_",
   seed=12345, max_mem_size="6G", nthreads=6
 ){
+  # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
   h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
+  # Predictions
   predDFList <- bacteriaClassification_Prediction(evalDF, destDir, H2OModelName, seed, max_mem_size, nthreads)
   saveRDS(predDFList, file.path(destDir, paste0(PredictionHeader, "Results_Seed", seed, ".rds")))
 
+  # Image-level probability distribution plot
   lev <- levels(evalDF$"Bacteria")
-  colPal <- ggsci::pal_d3()(length(lev))
-  colPal[grep(targetBacteria, lev, value=F)] <- "black"
-  thrList <- suppressWarnings(lapply(pROC::multiclass.roc(predDFList$"Image"$"Bacteria", predDFList$"Image"[[targetBacteria]])$rocs, function(r){pROC::coords(r, "best", ret="threshold")})) ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
-  probPlot <- ggplot(data=predDFList$"Image")
-  for(i in 1:length(thrList)){
-    probPlot <- probPlot + geom_hline(yintercept=thrList[[i]][1], color=setdiff(colPal, "black")[i], size=1)
-  }
-  probPlot <- probPlot +
-    geom_jitter(aes_string(x="Bacteria", y=targetBacteria, color="Bacteria"), width=0.2) +
+  plotData <- predDFList$"Image" %>%
+    dplyr::mutate(BacteriaColor=factor(dplyr::if_else(Bacteria==targetBacteria, targetBacteria, "Others"), levels=c(targetBacteria, "Others")))
+  colPal <- RColorBrewer::brewer.pal(3, "Dark2")[1:2] ## green and brown
+  thr <- pROC::coords(pROC::roc(plotData$"BacteriaColor", plotData[[targetBacteria]]), "b", ret="t", best.method="youden")[1] ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
+  probPlot <- ggplot(data=plotData, aes_string(x="Bacteria", y=targetBacteria, color="BacteriaColor")) +
+    geom_jitter(width=0.2) + geom_hline(yintercept=thr, color="grey50", size=1) +
     xlab(NULL) + scale_color_manual(values=colPal, guide=F) +
     plotUtility::theme_Publication()
   plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")))
 
-  if(length(lev)==2){
-    rocPlot <- predDFList$"Image" %>%
-      dplyr::mutate(Bacteria=as.numeric(Bacteria)-1) %>%
-      ggplot(aes_string(d="Bacteria", m=targetBacteria)) +
-      plotROC::geom_roc(n.cuts=0) +
-      plotROC::style_roc() +
-      plotUtility::theme_Publication()
-    rocPlot <- rocPlot + annotate("text", x=.75, y=.25, size=8, label=paste("AUC =", round(plotROC::calc_auc(rocPlot)$"AUC", 2)))
-    plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot_Seed", seed, ".pdf")))
-  }
+  # Image-level ROC plot
+  rocPlot <- plotData %>%
+    dplyr::mutate(BacteriaColor=2-as.numeric(BacteriaColor)) %>%
+    ggplot(aes_string(d="BacteriaColor", m=targetBacteria)) +
+    plotROC::geom_roc(n.cuts=0) +
+    plotROC::style_roc() +
+    plotUtility::theme_Publication()
+  rocPlot <- rocPlot + annotate("text", x=.75, y=.25, size=8,
+                                label=paste("AUC =", round(plotROC::calc_auc(rocPlot)$"AUC", 2)))
+  plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot_Seed", seed, ".pdf")))
 
   return(predDFList)
 }
