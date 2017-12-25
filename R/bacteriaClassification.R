@@ -44,7 +44,7 @@ bacteriaClassification_AutoML <- function(
 ){
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
 
   ## Define bacteria species to be classified
   lev <- levels(trainDF$"Bacteria")
@@ -99,7 +99,7 @@ bacteriaClassification_Prediction <- function(
   # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
 
   # Bacteria-level prediction
   evalH2ODF <- h2o::as.h2o(evalDF)
@@ -130,7 +130,7 @@ bacteriaClassification_Evaluation <- function(
   # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
 
   # Predictions
   predDFList <- bacteriaClassification_Prediction(evalDF, destDir, H2OModelName, seed, max_mem_size, nthreads)
