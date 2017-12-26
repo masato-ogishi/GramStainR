@@ -42,22 +42,23 @@ bacteriaClassification_AutoML <- function(
   destDir="./Results/", LeaderBoardName="LeaderBoard.csv", H2OModelName="BestH2OModel",
   seed=12345, max_mem_size="6G", nthreads=6
 ){
+  # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
-  ## Define bacteria species to be classified
+  # Define bacteria species to be classified
   lev <- levels(trainDF$"Bacteria")
   if(is.null(lev)){
     trainDF$"Bacteria" <- as.factor(trainDF$"Bacteria")
     lev <- levels(trainDF$"Bacteria")
   }
 
-  ## Down-sampling to avoid class imbalance
+  # Down-sampling to avoid class imbalance
   trainDF <- caret::downSample(dplyr::select(trainDF, -Bacteria), trainDF$"Bacteria", yname="Bacteria") %>%
     dplyr::select(Bacteria, setdiff(colnames(.), "Bacteria"))
 
-  ## Train bacteria classifiers
+  # Train bacteria classifiers
   df_train <- h2o::as.h2o(trainDF)
   df_test <- h2o::as.h2o(testDF)
   aml <- h2o::h2o.automl(
@@ -99,7 +100,7 @@ bacteriaClassification_Prediction <- function(
   # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
   # Bacteria-level prediction
   evalH2ODF <- h2o::as.h2o(evalDF)
@@ -130,7 +131,7 @@ bacteriaClassification_Evaluation <- function(
   # Working environment
   set.seed(seed)
   dir.create(destDir, showWarnings=F, recursive=T)
-  h2o::h2o.init(ip="localhost", max_mem_size=max_mem_size, nthreads=nthreads)
+  h2o::h2o.init(ip="localhost", port=seed, max_mem_size=max_mem_size, nthreads=nthreads)
 
   # Predictions
   predDFList <- bacteriaClassification_Prediction(evalDF, destDir, H2OModelName, seed, max_mem_size, nthreads)
@@ -143,10 +144,12 @@ bacteriaClassification_Evaluation <- function(
   colPal <- RColorBrewer::brewer.pal(3, "Dark2")[1:2] ## green and brown
   thr <- pROC::coords(pROC::roc(plotData$"BacteriaColor", plotData[[targetBacteria]]), "b", ret="t", best.method="youden")[1] ## Two or more threshold could sometimes be returned... The first one is the lowest, meaning maximum sensitivity for P.aeruginosa.
   probPlot <- ggplot(data=plotData, aes_string(x="Bacteria", y=targetBacteria, color="BacteriaColor")) +
-    geom_jitter(width=0.2) + geom_hline(yintercept=thr, color="grey50", size=1) +
+    geom_jitter(width=0.2) +
+    stat_summary(fun.data=mean_sdl, geom="pointrange") +
+    geom_hline(yintercept=thr, color="grey50", size=1) +
     xlab(NULL) + scale_color_manual(values=colPal, guide=F) +
     plotUtility::theme_Publication()
-  plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")))
+  plotUtility::savePDF(probPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_JitterPlot_Seed", seed, ".pdf")), width=5, height=5)
 
   # Image-level ROC plot
   rocPlot <- plotData %>%
@@ -157,7 +160,7 @@ bacteriaClassification_Evaluation <- function(
     plotUtility::theme_Publication()
   rocPlot <- rocPlot + annotate("text", x=.75, y=.25, size=8,
                                 label=paste("AUC =", round(plotROC::calc_auc(rocPlot)$"AUC", 2)))
-  plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot_Seed", seed, ".pdf")))
+  plotUtility::savePDF(rocPlot, outputFileName=file.path(destDir, paste0(PredictionHeader, "ImageLevel_ROCPlot_Seed", seed, ".pdf")), width=5, height=5)
 
   return(predDFList)
 }
