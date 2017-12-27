@@ -1,6 +1,6 @@
 Package: GramStainR
 Title: Automatic classification of digital Gram stain images
-Version: 0.2.0
+Version: 0.2.1
 Author: Masato Ogishi
 Maintainer: Masato Ogishi <oogishi-tky@umin.ac.jp>
 Description: Automatic classification of digital Gram stain images.
