@@ -16,14 +16,6 @@ devtools::install_github("masato-ogishi/GramStainR")
 
 -   You might be prompted to install some packages before installling GramStainR. Follow the message(s).
 
-Loading
-------------------
-
-``` r
-library(tidyverse)
-library(GramStainR)
-```
-
 Usage
 -----------------------------------
 ``` r
