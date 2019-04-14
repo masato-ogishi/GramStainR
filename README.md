@@ -1,7 +1,7 @@
 GramStainR: Automatic classification of bacterial species using Gram-stained images
 ===============================================
 
-The 'GramStainR' package provides some easy-to-use functions for analyzing digital Gram stain images.
+The 'GramStainR' package provides some easy-to-use functions for analyzing digital Gram stain images. The example provided here is a binary classification of E. coli and P. aeruginosa.
 
 Installation
 ------------------------
